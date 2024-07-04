@@ -30,7 +30,7 @@ class Book
     /**
      * @var Collection<int, Author>
      */
-    #[ORM\ManyToMany(targetEntity: Author::class, mappedBy: 'books')]
+    #[ORM\ManyToMany(targetEntity: Author::class, mappedBy: 'books', cascade: ['detach'])]
     private Collection $authors;
 
     public function __construct()

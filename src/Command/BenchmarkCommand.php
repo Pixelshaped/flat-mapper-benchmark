@@ -39,24 +39,25 @@ final class BenchmarkCommand extends Command
     ) {
         parent::__construct();
     }
-    private function measure(callable $callback, int $times = 1)  {
+    private function measure(callable $callback, int $times = 3)  {
 
         $duration = 0;
         $memory = 0;
         for ($i = 0; $i < $times; $i++) {
             $this->entityManager->clear();
+            gc_collect_cycles();
             memory_reset_peak_usage();
             $stopwatch = new Stopwatch();
             $stopwatch->start('cmdExec');
             $callback();
             $duration += ($stopwatch->stop('cmdExec'))->getDuration();
-            $memory += (memory_get_peak_usage()/1024/1024);
+            $memory += (memory_get_peak_usage(true)/1024/1024);
         }
 
         $duration = $duration / $times;
         $memory = $memory / $times;
 
-        return ['duration' => $duration, 'memory' => $memory];
+        return ['duration' => (int)$duration, 'memory' => (int)$memory];
     }
 
     function getSource(callable $method){

@@ -34,7 +34,7 @@ foreach($result as $book) {
 
 | Duration | Memory |
 |----------|--------|
-| 183ms    | 24MiB  |
+| 131ms    | 23MiB  |
 
 
 ### Doctrine entity
@@ -54,7 +54,7 @@ foreach($result as $book) {
 
 | Duration | Memory |
 |----------|--------|
-| 9712ms   | 135MiB |
+| 8640ms   | 35MiB  |
 
 
 ## Scalar
@@ -72,7 +72,7 @@ $result = $this->flatMapper->map(BookScalarDTO::class, $result);
 
 | Duration | Memory |
 |----------|--------|
-| 104ms    | 127MiB |
+| 74ms     | 34MiB  |
 
 
 ### Doctrine DTO
@@ -92,7 +92,7 @@ $result = $qb->select(
 
 | Duration | Memory |
 |----------|--------|
-| 57ms     | 127MiB |
+| 68ms     | 34MiB  |
 
 
 ### Manual mapping DQL
@@ -111,7 +111,7 @@ foreach ($result as $productEdit) {
 
 | Duration | Memory |
 |----------|--------|
-| 63ms     | 127MiB |
+| 76ms     | 34MiB  |
 
 
 ### Flatmapper mapping SQL
@@ -123,7 +123,7 @@ $result = $this->flatMapper->map(BookScalarDTO::class, $query->iterateAssociativ
 
 | Duration | Memory |
 |----------|--------|
-| 38ms     | 127MiB |
+| 34ms     | 34MiB  |
 
 
 ### Manual mapping SQL
@@ -139,7 +139,7 @@ foreach($query->iterateAssociative() as $row) {
 
 | Duration | Memory |
 |----------|--------|
-| 24ms     | 127MiB |
+| 22ms     | 34MiB  |
 
 
 ## Execute the benchmark yourself
