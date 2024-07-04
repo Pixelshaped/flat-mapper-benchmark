@@ -1,0 +1,48 @@
+# pixelshaped/flat-mapper-bundle benchmark
+
+This repository hosts some performance benchmarks for [pixelshaped/flat-mapper-bundle](https://github.com/Pixelshaped/flat-mapper-bundle) and Doctrine.
+
+It's also meant to prove the relevance of using DTOs when trying to squeeze the most performance out of your backend, all architectural considerations aside.
+
+While Doctrine entities are a fantastic tool to prototype, or even use on some of your pages, on hotpaths using Doctrine entities can result in poor performance. It's not the fault of Doctrine itself - it's pretty fast. But:
+
+- Entities inflate your Model: you're querying for a lot of things that you're not going to use
+- Entities leave you at risk of N+1 queries. You can tame those by adding `join` statements, but at some point you're eventually going to access a getter for which the `join` doesn't exist yet, and forget to add it.
+
+In the end your Model should rarely ever be larger than your View and the proper way to achieve this is to use DTOs. Doctrine provides a way to retrieve scalar DTOs, but you're on your own if you need nested DTOs. The creation of [pixelshaped/flat-mapper-bundle](https://github.com/Pixelshaped/flat-mapper-bundle) arose from that situation and aims to fill this gap.
+
+{% for category, benchmarks_for_category in benchmarks %}
+
+## {{ category }}
+
+{% for title, benchmark in benchmarks_for_category %}
+
+### {{ title }}
+
+```php
+{{ benchmark.source|raw }}```
+
+{{ markdown_table(
+    [[benchmark.results.duration ~ 'ms', benchmark.results.memory|round ~ 'MiB']],
+    ["Duration", "Memory"]
+) }}
+{% endfor %}
+{% endfor %}
+
+## Execute the benchmark yourself
+```bash
+# Launch database container
+docker-compose up -d
+
+# Execute migrations
+bin/console doctrine:migrations:migrate
+
+# Load fixtures
+bin/console doctrine:fixtures:load
+
+# Execute benchmark
+bin/console app:benchmark 
+```
+## Contribute
+
+Do not hesitate to open a pull request to add more benchmarks 
