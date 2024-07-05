@@ -7,7 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Pixelshaped\FlatMapperBundle\FlatMapper;
 
 /**
- * This is a bonus test to show how close in terms of performance FlatMapper is from manually mapping data to scalar DTOs
+ * This is a bonus test to show how close in terms of performance FlatMapper is from manually mapping data to scalar DTOs with raw SQL results
  */
 class SQLScalarBench extends AbstractBench
 {

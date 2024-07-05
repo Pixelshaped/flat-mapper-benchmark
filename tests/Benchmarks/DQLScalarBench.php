@@ -6,6 +6,11 @@ use App\DTO\BookScalarDTO;
 use App\Repository\BookRepository;
 use Pixelshaped\FlatMapperBundle\FlatMapper;
 
+/**
+ * In these tests we can see that all methods to map DQL results to a DTO only supporting scalar properties are almost as effective.
+ * Doctrine DTO has a little edge as it creates the DTOs during the results hydration, where other methods have to do it in another loop.
+ * FlatMapper is a little slower as it uses named parameters internally instead of mapping data in the same order as it has been queried.
+ */
 class DQLScalarBench extends AbstractBench
 {
     private BookRepository $bookRepository;

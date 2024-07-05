@@ -21,6 +21,8 @@ final class BenchmarkCommand extends Command
 {
     private array $benchmarkResults = [];
 
+    private const array BENCH_ORDER = ['NestedBench', 'DQLScalarBench', 'SQLScalarBench'];
+
     public function __construct(
         private readonly string $projectDir,
         private readonly Environment $twig,
@@ -56,6 +58,8 @@ final class BenchmarkCommand extends Command
             }
         }
 
+        $this->benchmarkResults =array_merge(array_flip(self::BENCH_ORDER), $this->benchmarkResults);
+
         $readmeFileContent = $this->twig->render('README.md.twig', [
             'benchmarks' => $this->benchmarkResults,
         ]);
@@ -75,7 +79,7 @@ final class BenchmarkCommand extends Command
         $comment = explode(PHP_EOL, $comment);
         $comment = array_slice($comment, 1, -1);
         $comment = array_map(fn($row) => trim($row, ' *'), $comment);
-        return implode(PHP_EOL, $comment);
+        return implode(PHP_EOL.PHP_EOL, $comment);
 
     }
 

@@ -47,8 +47,14 @@ In the end your Model should rarely ever be larger than your View and the proper
 
 ## Execute the benchmark yourself
 ```bash
+# Install dependencies
+composer install
+
 # Launch database container
 docker-compose up -d
+
+# Create database
+bin/console doctrine:database:create
 
 # Execute migrations
 bin/console doctrine:migrations:migrate

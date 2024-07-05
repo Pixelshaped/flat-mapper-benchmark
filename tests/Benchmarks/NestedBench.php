@@ -9,7 +9,8 @@ use Pixelshaped\FlatMapperBundle\FlatMapper;
 
 
 /**
- * This is the main and most relevant comparison. It's when you need to fetch nested DTOs that FlatMapper truly shines.
+ * This is the main and most relevant comparison: FlatMapper truly shines when using nested DTOs versus entities.
+ * Using other DTO mappers based on entities will eventually result in lower performance than `benchDoctrineEntities`.
  */
 class NestedBench extends AbstractBench
 {
