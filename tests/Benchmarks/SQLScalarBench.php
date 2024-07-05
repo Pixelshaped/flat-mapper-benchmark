@@ -4,11 +4,12 @@ namespace App\Tests\Benchmarks;
 
 use App\DTO\BookScalarDTO;
 use Doctrine\ORM\EntityManagerInterface;
-use PhpBench\Attributes\BeforeMethods;
 use Pixelshaped\FlatMapperBundle\FlatMapper;
 
-#[BeforeMethods('setUp')]
-class SQLBench extends AbstractBench
+/**
+ * This is a bonus test to show how close in terms of performance FlatMapper is from manually mapping data to scalar DTOs
+ */
+class SQLScalarBench extends AbstractBench
 {
     private EntityManagerInterface $entityManager;
     private FlatMapper $flatMapper;

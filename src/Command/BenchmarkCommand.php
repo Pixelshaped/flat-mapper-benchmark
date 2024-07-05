@@ -10,6 +10,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Process\Process;
 use Twig\Environment;
 
 #[AsCommand(
@@ -18,8 +19,6 @@ use Twig\Environment;
 )]
 final class BenchmarkCommand extends Command
 {
-    private SymfonyStyle $io;
-
     private array $benchmarkResults = [];
 
     public function __construct(
@@ -31,22 +30,25 @@ final class BenchmarkCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->io = new SymfonyStyle($input, $output);
+        $io = new SymfonyStyle($input, $output);
 
-        $this->io->title('Benchmark');
+        $io->title('Benchmark');
 
-//        $process = (new Process(['./vendor/bin/phpbench', 'run', '-d', 'report.xml', '--report=default']))->setTimeout(null);
-//        $process->run(fn ($type, $buffer) => $output->write($buffer));
+        $process = (new Process(['./vendor/bin/phpbench', 'run', '-d', 'report.xml', '--report=default']))->setTimeout(null);
+        $process->run(fn ($type, $buffer) => $output->write($buffer));
 
         $xml = simplexml_load_file($this->projectDir.'/report.xml');
         foreach ($xml->suite->xpath('//benchmark') as $benchmark) {
             $className = (string)$benchmark['class'];
+            $reflectionClass = new \ReflectionClass($className);
+            $shortName = $reflectionClass->getShortName();
             foreach ($benchmark->children() as $subject) {
                 $methodName = (string)$subject['name'];
                 $source = $this->getSource($className, $methodName);
                 $duration = round($subject->variant->iteration['time-avg']/1000, 3).'ms';
                 $memory = round($subject->variant->iteration['mem-real']/1000000, 3).'mb';
-                $this->benchmarkResults[$className][$methodName] = [
+                $this->benchmarkResults[$shortName]['description'] = $this->getDocComment($reflectionClass);
+                $this->benchmarkResults[$shortName]['results'][$methodName] = [
                     'source' => $source,
                     'duration' => $duration,
                     'memory' => $memory,
@@ -59,7 +61,22 @@ final class BenchmarkCommand extends Command
         ]);
         file_put_contents($this->projectDir.'/README.md', $readmeFileContent);
 
+        $io->success('Benchmark generated');
+
         return Command::SUCCESS;
+    }
+
+    private function getDocComment(\ReflectionClass $class): string
+    {
+        $comment = $class->getDocComment();
+        if($comment === false) {
+            return '';
+        }
+        $comment = explode(PHP_EOL, $comment);
+        $comment = array_slice($comment, 1, -1);
+        $comment = array_map(fn($row) => trim($row, ' *'), $comment);
+        return implode(PHP_EOL, $comment);
+
     }
 
     private function getSource(string $class, string $method){

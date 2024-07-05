@@ -5,10 +5,12 @@ namespace App\Tests\Benchmarks;
 use App\DTO\BookDTO;
 use App\Repository\BookRepository;
 use App\Service\BookDisplayer;
-use PhpBench\Attributes\BeforeMethods;
 use Pixelshaped\FlatMapperBundle\FlatMapper;
 
-#[BeforeMethods('setUp')]
+
+/**
+ * This is the main and most relevant comparison. It's when you need to fetch nested DTOs that FlatMapper truly shines.
+ */
 class NestedBench extends AbstractBench
 {
     private BookRepository $bookRepository;

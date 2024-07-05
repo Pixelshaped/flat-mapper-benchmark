@@ -2,17 +2,32 @@
 
 This repository hosts some performance benchmarks for [pixelshaped/flat-mapper-bundle](https://github.com/Pixelshaped/flat-mapper-bundle) and Doctrine.
 
-It's also meant to prove the relevance of using DTOs when trying to squeeze the most performance out of your backend, all architectural considerations aside.
+It's also meant to prove the relevance of using DTOs when trying to squeeze the best performance out of your backend, all architectural considerations aside.
 
-While Doctrine entities are a fantastic tool to prototype, or even use on some of your pages, on hotpaths using Doctrine entities can result in poor performance. It's not the fault of Doctrine itself - it's pretty fast. But:
+While Doctrine entities are a fantastic tool to prototype, or even use on some of your low traffic pages, on hotpaths using Doctrine entities can result in poor performance. It's not the fault of Doctrine itself - it's pretty fast. But:
 
 - Entities inflate your Model: you're querying for a lot of things that you're not going to use
 - Entities leave you at risk of N+1 queries. You can tame those by adding `join` statements, but at some point you're eventually going to access a getter for which the `join` doesn't exist yet, and forget to add it.
 
 In the end your Model should rarely ever be larger than your View and the proper way to achieve this is to use DTOs. Doctrine provides a way to retrieve scalar DTOs, but you're on your own if you need nested DTOs. The creation of [pixelshaped/flat-mapper-bundle](https://github.com/Pixelshaped/flat-mapper-bundle) arose from that situation and aims to fill this gap.
 
+## Summary
+| Category       | Method                      | Duration   | Memory   |
+|----------------|-----------------------------|------------|----------|
+| SQLScalarBench | benchFlatMapperWithSQL      | 22.609ms   | 8.389mb  |
+| SQLScalarBench | benchManualMappingWithSQL   | 18.629ms   | 8.389mb  |
+| DQLScalarBench | benchFlatMapperWithDQL      | 54.579ms   | 10.486mb |
+| DQLScalarBench | benchDoctrineDTOs           | 48.896ms   | 10.486mb |
+| DQLScalarBench | benchManualMappingWithDQL   | 50.775ms   | 10.486mb |
+| NestedBench    | benchFlatMapperDTOs         | 244.153ms  | 25.166mb |
+| NestedBench    | benchDoctrineEntities       | 672.184ms  | 44.04mb  |
+| NestedBench    | benchDoctrineEntitiesWithN1 | 2245.907ms | 37.749mb |
 
-## \App\Tests\Benchmarks\SQLBench
+
+
+## SQLScalarBench
+
+This is a bonus test to show how close in terms of performance FlatMapper is from manually mapping data to scalar DTOs
 
 
 ### benchFlatMapperWithSQL
@@ -24,7 +39,7 @@ $result = $this->flatMapper->map(BookScalarDTO::class, $query->iterateAssociativ
 
 | Duration | Memory  |
 |----------|---------|
-| 23.138ms | 8.389mb |
+| 22.609ms | 8.389mb |
 
 
 ### benchManualMappingWithSQL
@@ -39,10 +54,11 @@ foreach($query->iterateAssociative() as $row) {
 
 | Duration | Memory  |
 |----------|---------|
-| 19.723ms | 8.389mb |
+| 18.629ms | 8.389mb |
 
 
-## \App\Tests\Benchmarks\ScalarBench
+## DQLScalarBench
+
 
 
 ### benchFlatMapperWithDQL
@@ -57,7 +73,7 @@ $result = $this->flatMapper->map(BookScalarDTO::class, $result);
 
 | Duration | Memory   |
 |----------|----------|
-| 55.895ms | 10.486mb |
+| 54.579ms | 10.486mb |
 
 
 ### benchDoctrineDTOs
@@ -71,7 +87,7 @@ $result = $qb->select(sprintf('NEW %s(book.id, book.title, book.isbn)', BookScal
 
 | Duration | Memory   |
 |----------|----------|
-| 51.416ms | 10.486mb |
+| 48.896ms | 10.486mb |
 
 
 ### benchManualMappingWithDQL
@@ -90,10 +106,12 @@ foreach ($result as $productEdit) {
 
 | Duration | Memory   |
 |----------|----------|
-| 52.689ms | 10.486mb |
+| 50.775ms | 10.486mb |
 
 
-## \App\Tests\Benchmarks\NestedBench
+## NestedBench
+
+This is the main and most relevant comparison. It&#039;s when you need to fetch nested DTOs that FlatMapper truly shines.
 
 
 ### benchFlatMapperDTOs
@@ -113,7 +131,7 @@ foreach ($result as $book) {
 
 | Duration  | Memory   |
 |-----------|----------|
-| 244.825ms | 25.166mb |
+| 244.153ms | 25.166mb |
 
 
 ### benchDoctrineEntities
@@ -134,7 +152,7 @@ foreach ($result as $book) {
 
 | Duration  | Memory  |
 |-----------|---------|
-| 686.664ms | 44.04mb |
+| 672.184ms | 44.04mb |
 
 
 ### benchDoctrineEntitiesWithN1
@@ -151,7 +169,7 @@ foreach ($result as $book) {
 
 | Duration   | Memory   |
 |------------|----------|
-| 2314.667ms | 37.749mb |
+| 2245.907ms | 37.749mb |
 
 
 ## Execute the benchmark yourself

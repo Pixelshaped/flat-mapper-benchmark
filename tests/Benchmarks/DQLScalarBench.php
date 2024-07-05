@@ -4,11 +4,9 @@ namespace App\Tests\Benchmarks;
 
 use App\DTO\BookScalarDTO;
 use App\Repository\BookRepository;
-use PhpBench\Attributes\BeforeMethods;
 use Pixelshaped\FlatMapperBundle\FlatMapper;
 
-#[BeforeMethods('setUp')]
-class ScalarBench extends AbstractBench
+class DQLScalarBench extends AbstractBench
 {
     private BookRepository $bookRepository;
     private FlatMapper $flatMapper;
