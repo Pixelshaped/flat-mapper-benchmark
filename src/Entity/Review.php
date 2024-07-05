@@ -3,10 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\ReviewRepository;
+use App\Service\ReviewDisplayableInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ReviewRepository::class)]
-class Review
+class Review implements ReviewDisplayableInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -14,7 +15,7 @@ class Review
     private ?int $id = null;
 
     #[ORM\Column]
-    private ?int $note = null;
+    private ?int $rating = null;
 
     #[ORM\ManyToOne(inversedBy: 'reviews')]
     #[ORM\JoinColumn(nullable: false)]
@@ -25,14 +26,14 @@ class Review
         return $this->id;
     }
 
-    public function getNote(): ?int
+    public function getRating(): ?int
     {
-        return $this->note;
+        return $this->rating;
     }
 
-    public function setNote(int $note): static
+    public function setRating(int $rating): static
     {
-        $this->note = $note;
+        $this->rating = $rating;
 
         return $this;
     }

@@ -1,0 +1,201 @@
+<?xml version="1.0"?>
+<phpbench version="1.3.1">
+    <suite tag="" context="" date="2024-07-04T21:29:40+00:00"
+           config-path="/Users/renaud/Code/flat-mapper-benchmark/phpbench.json"
+           uuid="134d940297f428195c49ffabab6ff96056f77084">
+        <env>
+            <uname>
+                <value name="os" type="string">Darwin</value>
+                <value name="host" type="string">MacBook-Pro-de-Renaud.local</value>
+                <value name="release" type="string">23.5.0</value>
+                <value name="version" type="string">Darwin Kernel Version 23.5.0: Wed May 1 20:12:58 PDT 2024;
+                    root:xnu-10063.121.3~5/RELEASE_ARM64_T6000
+                </value>
+                <value name="machine" type="string">arm64</value>
+            </uname>
+            <php>
+                <value name="xdebug" type="boolean">1</value>
+                <value name="version" type="string">8.3.4</value>
+                <value name="ini" type="string">/opt/homebrew/etc/php/8.3/php.ini</value>
+                <value name="extensions" type="string">Core, date, libxml, openssl, pcre, sqlite3, zlib, bcmath, bz2,
+                    calendar, ctype, curl, dba, dom, hash, FFI, fileinfo, filter, ftp, gd, gettext, gmp, json, iconv,
+                    intl, SPL, ldap, mbstring, session, standard, odbc, pcntl, exif, mysqlnd, PDO, pdo_dblib, pdo_mysql,
+                    PDO_ODBC, pdo_pgsql, pdo_sqlite, pgsql, Phar, posix, pspell, random, readline, Reflection, mysqli,
+                    shmop, SimpleXML, soap, sockets, sodium, sysvmsg, sysvsem, sysvshm, tidy, tokenizer, xml, xmlreader,
+                    xmlwriter, xsl, zip, xdebug, Zend OPcache
+                </value>
+            </php>
+            <opcache>
+                <value name="extension_loaded" type="boolean">1</value>
+                <value name="enabled" type="boolean"></value>
+            </opcache>
+            <vcs>
+                <value name="system" type="string">git</value>
+                <value name="branch" type="string">main</value>
+                <value name="version" type="string">89d9a72dbe7aabb0405626723602e25837c8b3ef</value>
+            </vcs>
+            <sampler>
+                <value name="nothing" type="double">0.021934509277344</value>
+                <value name="md5" type="double">0.27799606323242</value>
+                <value name="file_rw" type="double">2.0780563354492</value>
+            </sampler>
+        </env>
+        <benchmark class="\App\Tests\Benchmarks\SQLBench">
+            <subject name="benchFlatMapperWithSQL">
+                <executor name="remote">
+                    <parameter name="php_config" type="collection"/>
+                    <parameter name="safe_parameters" value="1" type="boolean"/>
+                    <parameter name="executor" value="remote" type="string"/>
+                </executor>
+                <variant sleep="0" output-time-unit="microseconds" output-time-precision="" output-mode="time" revs="1"
+                         warmup="0" retry-threshold="2">
+                    <parameter-set name=""/>
+                    <iteration time-net="48658" time-revs="1" time-avg="48658" mem-peak="8505328" mem-real="10485760"
+                               mem-final="6097960" comp-z-value="0.97562508897607" comp-deviation="0.61205078367313"/>
+                    <iteration time-net="47945" time-revs="1" time-avg="47945" mem-peak="8505328" mem-real="10485760"
+                               mem-final="6097960" comp-z-value="-1.3744448044021" comp-deviation="-0.86224721889086"
+                               reject-count="1"/>
+                    <iteration time-net="48483" time-revs="1" time-avg="48483" mem-peak="8505328" mem-real="10485760"
+                               mem-final="6097960" comp-z-value="0.39881971542603" comp-deviation="0.25019643521773"
+                               reject-count="3"/>
+                    <stats max="48658" mean="48362" min="47945" mode="48518.46966732" rstdev="0.62734219382928"
+                           stdev="303.39523177971" sum="145086" variance="92048.666666667"/>
+                </variant>
+            </subject>
+            <subject name="benchManualMappingWithSQL">
+                <executor name="remote">
+                    <parameter name="php_config" type="collection"/>
+                    <parameter name="safe_parameters" value="1" type="boolean"/>
+                    <parameter name="executor" value="remote" type="string"/>
+                </executor>
+                <variant sleep="0" output-time-unit="microseconds" output-time-precision="" output-mode="time" revs="1"
+                         warmup="0" retry-threshold="2">
+                    <parameter-set name=""/>
+                    <iteration time-net="43043" time-revs="1" time-avg="43043" mem-peak="8502864" mem-real="10485760"
+                               mem-final="6096088" comp-z-value="-1.3226016969466" comp-deviation="-1.3973839140494"/>
+                    <iteration time-net="43758" time-revs="1" time-avg="43758" mem-peak="8502864" mem-real="10485760"
+                               mem-final="6096088" comp-z-value="0.22766094783507" comp-deviation="0.24053329668064"
+                               reject-count="8"/>
+                    <iteration time-net="44158" time-revs="1" time-avg="44158" mem-peak="8502864" mem-real="10485760"
+                               mem-final="6096088" comp-z-value="1.0949407491115" comp-deviation="1.1568506173688"
+                               reject-count="9"/>
+                    <stats max="44158" mean="43653" min="43043" mode="43837.246575342" rstdev="1.0565417519692"
+                           stdev="461.21217098714" sum="130959" variance="212716.66666667"/>
+                </variant>
+            </subject>
+        </benchmark>
+        <result key="time" class="PhpBench\Model\Result\TimeResult"/>
+        <result key="mem" class="PhpBench\Model\Result\MemoryResult"/>
+        <result key="comp" class="PhpBench\Model\Result\ComputedResult"/>
+        <result key="reject" class="PhpBench\Model\Result\RejectionCountResult"/>
+        <benchmark class="\App\Tests\Benchmarks\ScalarBench">
+            <subject name="benchFlatMapperWithDQL">
+                <executor name="remote">
+                    <parameter name="php_config" type="collection"/>
+                    <parameter name="safe_parameters" value="1" type="boolean"/>
+                    <parameter name="executor" value="remote" type="string"/>
+                </executor>
+                <variant sleep="0" output-time-unit="microseconds" output-time-precision="" output-mode="time" revs="1"
+                         warmup="0" retry-threshold="2">
+                    <parameter-set name=""/>
+                    <iteration time-net="100878" time-revs="1" time-avg="100878" mem-peak="11469984" mem-real="12582912"
+                               mem-final="9054320" comp-z-value="0.87261146698125" comp-deviation="0.41275423869406"
+                               reject-count="4"/>
+                    <iteration time-net="100714" time-revs="1" time-avg="100714" mem-peak="11469984" mem-real="12582912"
+                               mem-final="9054320" comp-z-value="0.5274950347025" comp-deviation="0.24951060088258"
+                               reject-count="2"/>
+                    <iteration time-net="99798" time-revs="1" time-avg="99798" mem-peak="11469984" mem-real="12582912"
+                               mem-final="9054320" comp-z-value="-1.4001065016837" comp-deviation="-0.66226483957662"
+                               reject-count="1"/>
+                    <stats max="100878" mean="100463.33333333" min="99798" mode="100727.94129158"
+                           rstdev="0.47301033084284" stdev="475.20194537574" sum="301390" variance="225816.88888889"/>
+                </variant>
+            </subject>
+            <subject name="benchDoctrineDTOs">
+                <executor name="remote">
+                    <parameter name="php_config" type="collection"/>
+                    <parameter name="safe_parameters" value="1" type="boolean"/>
+                    <parameter name="executor" value="remote" type="string"/>
+                </executor>
+                <variant sleep="0" output-time-unit="microseconds" output-time-precision="" output-mode="time" revs="1"
+                         warmup="0" retry-threshold="2">
+                    <parameter-set name=""/>
+                    <iteration time-net="92251" time-revs="1" time-avg="92251" mem-peak="11444408" mem-real="12582912"
+                               mem-final="9028152" comp-z-value="1.4142134877301" comp-deviation="1.9641001834781"/>
+                    <iteration time-net="89585" time-revs="1" time-avg="89585" mem-peak="11444408" mem-real="12582912"
+                               mem-final="9028152" comp-z-value="-0.70750466549921" comp-deviation="-0.98260273669784"/>
+                    <iteration time-net="89586" time-revs="1" time-avg="89586" mem-peak="11444408" mem-real="12582912"
+                               mem-final="9028152" comp-z-value="-0.70670882223093" comp-deviation="-0.98149744678029"
+                               reject-count="1"/>
+                    <stats max="92251" mean="90474" min="89585" mode="89746.733855186" rstdev="1.3888286319703"
+                           stdev="1256.5288164888" sum="271422" variance="1578864.6666667"/>
+                </variant>
+            </subject>
+            <subject name="benchManualMappingWithDQL">
+                <executor name="remote">
+                    <parameter name="php_config" type="collection"/>
+                    <parameter name="safe_parameters" value="1" type="boolean"/>
+                    <parameter name="executor" value="remote" type="string"/>
+                </executor>
+                <variant sleep="0" output-time-unit="microseconds" output-time-precision="" output-mode="time" revs="1"
+                         warmup="0" retry-threshold="2">
+                    <parameter-set name=""/>
+                    <iteration time-net="94017" time-revs="1" time-avg="94017" mem-peak="11467520" mem-real="12582912"
+                               mem-final="9052448" comp-z-value="1.3347552998178" comp-deviation="0.86145857918338"/>
+                    <iteration time-net="92569" time-revs="1" time-avg="92569" mem-peak="11467520" mem-real="12582912"
+                               mem-final="9052448" comp-z-value="-1.072125988023" comp-deviation="-0.69195614392688"
+                               reject-count="2"/>
+                    <iteration time-net="93056" time-revs="1" time-avg="93056" mem-peak="11467520" mem-real="12582912"
+                               mem-final="9052448" comp-z-value="-0.26262931179479" comp-deviation="-0.16950243525651"
+                               reject-count="4"/>
+                    <stats max="94017" mean="93214" min="92569" mode="92954.377690803" rstdev="0.64540562551125"
+                           stdev="601.60839976405" sum="279642" variance="361932.66666667"/>
+                </variant>
+            </subject>
+        </benchmark>
+        <benchmark class="\App\Tests\Benchmarks\NestedBench">
+            <subject name="benchFlatMapperDTOs">
+                <executor name="remote">
+                    <parameter name="php_config" type="collection"/>
+                    <parameter name="safe_parameters" value="1" type="boolean"/>
+                    <parameter name="executor" value="remote" type="string"/>
+                </executor>
+                <variant sleep="0" output-time-unit="microseconds" output-time-precision="" output-mode="time" revs="1"
+                         warmup="0" retry-threshold="2">
+                    <parameter-set name=""/>
+                    <iteration time-net="142376" time-revs="1" time-avg="142376" mem-peak="18704928" mem-real="20971520"
+                               mem-final="9136608" comp-z-value="-0.77152177758078" comp-deviation="-0.98819864113994"/>
+                    <iteration time-net="142617" time-revs="1" time-avg="142617" mem-peak="18704928" mem-real="20971520"
+                               mem-final="9136608" comp-z-value="-0.64067255281162" comp-deviation="-0.82060126428229"
+                               reject-count="1"/>
+                    <iteration time-net="146398" time-revs="1" time-avg="146398" mem-peak="18704928" mem-real="20971520"
+                               mem-final="9136608" comp-z-value="1.4121943303924" comp-deviation="1.8087999054222"/>
+                    <stats max="146398" mean="143797" min="142376" mode="142738.05870841" rstdev="1.2808434834316"
+                           stdev="1841.8145038702" sum="431391" variance="3392280.6666667"/>
+                </variant>
+            </subject>
+            <subject name="benchDoctrineEntities">
+                <executor name="remote">
+                    <parameter name="php_config" type="collection"/>
+                    <parameter name="safe_parameters" value="1" type="boolean"/>
+                    <parameter name="executor" value="remote" type="string"/>
+                </executor>
+                <variant sleep="0" output-time-unit="microseconds" output-time-precision="" output-mode="time" revs="1"
+                         warmup="0" retry-threshold="2">
+                    <parameter-set name=""/>
+                    <iteration time-net="8915781" time-revs="1" time-avg="8915781" mem-peak="28968912"
+                               mem-real="31457280" mem-final="28658776" comp-z-value="1.1039480408456"
+                               comp-deviation="0.57981090094882"/>
+                    <iteration time-net="8874325" time-revs="1" time-avg="8874325" mem-peak="28968912"
+                               mem-real="31457280" mem-final="28658776" comp-z-value="0.21351539317788"
+                               comp-deviation="0.11214164788958" reject-count="3"/>
+                    <iteration time-net="8803047" time-revs="1" time-avg="8803047" mem-peak="28968912"
+                               mem-real="31457280" mem-final="28658776" comp-z-value="-1.3174634340236"
+                               comp-deviation="-0.69195254883842"/>
+                    <stats max="8915781" mean="8864384.3333333" min="8803047" mode="8882468.2133069"
+                           rstdev="0.52521575245939" stdev="46557.142877209" sum="26593153" variance="2167567552.8889"/>
+                </variant>
+            </subject>
+        </benchmark>
+    </suite>
+</phpbench>

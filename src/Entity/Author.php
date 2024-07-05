@@ -3,12 +3,13 @@
 namespace App\Entity;
 
 use App\Repository\AuthorRepository;
+use App\Service\AuthorDisplayableInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AuthorRepository::class)]
-class Author
+class Author implements AuthorDisplayableInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -83,5 +84,10 @@ class Author
         $this->books->removeElement($book);
 
         return $this;
+    }
+
+    public function getFullName(): ?string
+    {
+        return $this->firstName.' '.$this->lastName;
     }
 }

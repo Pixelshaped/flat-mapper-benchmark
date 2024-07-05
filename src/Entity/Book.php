@@ -3,12 +3,13 @@
 namespace App\Entity;
 
 use App\Repository\BookRepository;
+use App\Service\BookDisplayableInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
-class Book
+class Book implements BookDisplayableInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

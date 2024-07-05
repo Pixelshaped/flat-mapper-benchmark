@@ -12,7 +12,7 @@ class ReviewFixtures extends BaseFixture implements DependentFixtureInterface
     {
         $this->createMany(BookFixtures::BOOK_NUMBER * 3, Review::class, function () {
             $review = new Review();
-            $review->setNote(random_int(1, 5));
+            $review->setRating(random_int(1, 5));
             $review->setBook(
                 $this->getRandomReference(Book::class)
             );
