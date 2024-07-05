@@ -23,7 +23,7 @@ In the end your Model should rarely ever be larger than your View and the proper
 {{ benchmark.source|raw }}```
 
 {{ markdown_table(
-    [[benchmark.results.duration ~ 'ms', benchmark.results.memory|round ~ 'MiB']],
+    [[benchmark.duration, benchmark.memory]],
     ["Duration", "Memory"]
 ) }}
 {% endfor %}

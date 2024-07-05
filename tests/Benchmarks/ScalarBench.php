@@ -24,13 +24,7 @@ class ScalarBench extends AbstractBench
     public function benchDoctrineDTOs()
     {
         $qb = $this->bookRepository->createQueryBuilder('book');
-        $result = $qb->select(
-            sprintf('
-                NEW %s(
-                    book.id,
-                    book.title,
-                    book.isbn)',
-                BookScalarDTO::class))
+        $result = $qb->select(sprintf('NEW %s(book.id, book.title, book.isbn)', BookScalarDTO::class))
             ->getQuery()
             ->getResult();
     }

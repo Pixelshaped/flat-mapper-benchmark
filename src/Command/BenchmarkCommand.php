@@ -5,20 +5,11 @@ declare(strict_types=1);
 namespace App\Command;
 
 
-use App\DTO\AuthorDTO;
-use App\DTO\BookDTO;
-use App\DTO\BookScalarDTO;
-use App\Entity\Author;
-use App\Repository\BookRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Pixelshaped\FlatMapperBundle\FlatMapper;
-use ReflectionFunction;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Stopwatch\Stopwatch;
 use Twig\Environment;
 
 #[AsCommand(
@@ -27,63 +18,15 @@ use Twig\Environment;
 )]
 final class BenchmarkCommand extends Command
 {
-    private array $benchmarks = [];
     private SymfonyStyle $io;
 
+    private array $benchmarkResults = [];
+
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly BookRepository $bookRepository,
-        private readonly FlatMapper $flatMapper,
-        private readonly Environment $twig,
         private readonly string $projectDir,
+        private readonly Environment $twig,
     ) {
         parent::__construct();
-    }
-    private function measure(callable $callback, int $times = 3)  {
-
-        $duration = 0;
-        $memory = 0;
-        for ($i = 0; $i < $times; $i++) {
-            $this->entityManager->clear();
-            gc_collect_cycles();
-            memory_reset_peak_usage();
-            $stopwatch = new Stopwatch();
-            $stopwatch->start('cmdExec');
-            $callback();
-            $duration += ($stopwatch->stop('cmdExec'))->getDuration();
-            $memory += (memory_get_peak_usage(true)/1024/1024);
-        }
-
-        $duration = $duration / $times;
-        $memory = $memory / $times;
-
-        return ['duration' => (int)$duration, 'memory' => (int)$memory];
-    }
-
-    function getSource(callable $method){
-
-        $func = new ReflectionFunction($method);
-
-        $f = $func->getFileName();
-        $start_line = $func->getStartLine();
-        $end_line = $func->getEndLine() - 1;
-
-        $source = file($f);
-        $source = implode('', array_slice($source, 0, count($source)));
-        $source = preg_split("/".PHP_EOL."/", $source);
-
-        $body = '';
-        for($i=$start_line; $i<$end_line; $i++)
-            $body.="{$source[$i]}\n";
-
-        return $body;
-    }
-
-    private function addBenchmark(string $category, string $title, callable $benchmarkCallable): void
-    {
-        $this->io->text($category.' - '.$title);
-        $this->benchmarks[$category][$title]['results'] = $this->measure($benchmarkCallable);
-        $this->benchmarks[$category][$title]['source'] = str_replace('            ', '', $this->getSource($benchmarkCallable));
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -92,87 +35,50 @@ final class BenchmarkCommand extends Command
 
         $this->io->title('Benchmark');
 
-        $this->addBenchmark('Nested', 'FlatMapper DTOs', function ()  {
-            $qb = $this->bookRepository->createQueryBuilder('book');
-            $result = $qb->select('book.id, book.title, book.isbn, authors.id as author_id, authors.firstName as author_first_name, authors.lastName as author_last_name')
-                ->leftJoin('book.authors', 'authors')
-                ->getQuery()
-                ->getResult();
-            $result = $this->flatMapper->map(BookDTO::class, $result);
-            foreach($result as $book) {
-                $author = reset($book->authors);
-                if($author instanceof AuthorDTO) {
-                    $author->firstName;
-                }
+//        $process = (new Process(['./vendor/bin/phpbench', 'run', '-d', 'report.xml', '--report=default']))->setTimeout(null);
+//        $process->run(fn ($type, $buffer) => $output->write($buffer));
+
+        $xml = simplexml_load_file($this->projectDir.'/report.xml');
+        foreach ($xml->suite->xpath('//benchmark') as $benchmark) {
+            $className = (string)$benchmark['class'];
+            foreach ($benchmark->children() as $subject) {
+                $methodName = (string)$subject['name'];
+                $source = $this->getSource($className, $methodName);
+                $duration = round($subject->variant->iteration['time-avg']/1000, 3).'ms';
+                $memory = round($subject->variant->iteration['mem-real']/1000000, 3).'mb';
+                $this->benchmarkResults[$className][$methodName] = [
+                    'source' => $source,
+                    'duration' => $duration,
+                    'memory' => $memory,
+                ];
             }
-        });
-
-        $this->addBenchmark('Nested', 'Doctrine entity', function () {
-            $qb = $this->bookRepository->createQueryBuilder('book');
-            $result = $qb
-                ->getQuery()
-                ->getResult();
-            foreach($result as $book) {
-                $author = $book->getAuthors()[0];
-                if($author instanceof Author) {
-                    $author->getFirstName();
-                }
-            }
-        });
-
-        $this->addBenchmark('Scalar','FlatMapper mapping DQL', function () {
-            $qb = $this->bookRepository->createQueryBuilder('book');
-            $result = $qb->select('book.id, book.title, book.isbn')
-                ->getQuery()
-                ->toIterable();
-            $result = $this->flatMapper->map(BookScalarDTO::class, $result);
-        });
-
-        $this->addBenchmark('Scalar','Doctrine DTO', function () {
-            $qb = $this->bookRepository->createQueryBuilder('book');
-            $result = $qb->select(
-                sprintf('
-                NEW %s(
-                    book.id,
-                    book.title,
-                    book.isbn)',
-                    BookScalarDTO::class))
-                ->getQuery()
-                ->getResult();
-        });
-
-        $this->addBenchmark('Scalar','Manual mapping DQL', function () {
-            $qb = $this->bookRepository->createQueryBuilder('book');
-            $result = $qb->select('book.id, book.title, book.isbn')
-                ->getQuery()
-                ->toIterable();
-
-            $resultSet = [];
-            foreach ($result as $productEdit) {
-                $resultSet[] = new BookScalarDTO(...$productEdit);
-            }
-        });
-
-        $this->addBenchmark('Scalar', 'Flatmapper mapping SQL', function () {
-            $query = $this->entityManager->getConnection()->executeQuery('SELECT id, title, isbn FROM book');
-            $result = $this->flatMapper->map(BookScalarDTO::class, $query->iterateAssociative());
-        });
-
-        $this->addBenchmark('Scalar','Manual mapping SQL', function () {
-            $query = $this->entityManager->getConnection()->executeQuery('SELECT id, title, isbn FROM book');
-
-            $resultSet = [];
-            foreach($query->iterateAssociative() as $row) {
-                $resultSet[] = new BookScalarDTO(...$row);
-            }
-        });
+        }
 
         $readmeFileContent = $this->twig->render('README.md.twig', [
-            'benchmarks' => $this->benchmarks,
+            'benchmarks' => $this->benchmarkResults,
         ]);
-
         file_put_contents($this->projectDir.'/README.md', $readmeFileContent);
 
         return Command::SUCCESS;
+    }
+
+    private function getSource(string $class, string $method){
+
+        $func = new \ReflectionMethod($class, $method);
+
+        $f = $func->getFileName();
+        $startLine = $func->getStartLine() + 1;
+        $endLine = $func->getEndLine() - 1;
+
+        $source = file($f);
+        $source = implode('', array_slice($source, 0, count($source)));
+        $source = preg_split("/".PHP_EOL."/", $source);
+
+        $body = '';
+        for($i = $startLine; $i < $endLine; $i++) {
+            $body .= "{$source[$i]}".PHP_EOL;
+        }
+
+        return str_replace('        ', '', $body);
     }
 }

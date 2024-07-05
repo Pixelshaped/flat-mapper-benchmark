@@ -3,10 +3,12 @@
 namespace App\Tests\Benchmarks;
 
 use App\Kernel;
+use PhpBench\Attributes\Iterations;
+use PhpBench\Attributes\RetryThreshold;
 use Psr\Container\ContainerInterface;
 
-//#[RetryThreshold(2.0)]
-//#[Iterations(3)]
+#[RetryThreshold(1.0)]
+#[Iterations(3)]
 abstract class AbstractBench
 {
     public function container(): ContainerInterface

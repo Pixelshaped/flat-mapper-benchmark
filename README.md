@@ -12,55 +12,40 @@ While Doctrine entities are a fantastic tool to prototype, or even use on some o
 In the end your Model should rarely ever be larger than your View and the proper way to achieve this is to use DTOs. Doctrine provides a way to retrieve scalar DTOs, but you're on your own if you need nested DTOs. The creation of [pixelshaped/flat-mapper-bundle](https://github.com/Pixelshaped/flat-mapper-bundle) arose from that situation and aims to fill this gap.
 
 
-## Nested
+## \App\Tests\Benchmarks\SQLBench
 
 
-### FlatMapper DTOs
+### benchFlatMapperWithSQL
 
 ```php
-$qb = $this->bookRepository->createQueryBuilder('book');
-$result = $qb->select('book.id, book.title, book.isbn, authors.id as author_id, authors.firstName as author_first_name, authors.lastName as author_last_name')
-    ->leftJoin('book.authors', 'authors')
-    ->getQuery()
-    ->getResult();
-$result = $this->flatMapper->map(BookDTO::class, $result);
-foreach($result as $book) {
-    $author = reset($book->authors);
-    if($author instanceof AuthorDTO) {
-        $author->firstName;
-    }
+$query = $this->entityManager->getConnection()->executeQuery('SELECT id, title, isbn FROM book');
+$result = $this->flatMapper->map(BookScalarDTO::class, $query->iterateAssociative());
+```
+
+| Duration | Memory  |
+|----------|---------|
+| 23.138ms | 8.389mb |
+
+
+### benchManualMappingWithSQL
+
+```php
+$query = $this->entityManager->getConnection()->executeQuery('SELECT id, title, isbn FROM book');
+$resultSet = [];
+foreach($query->iterateAssociative() as $row) {
+    $resultSet[] = new BookScalarDTO(...$row);
 }
 ```
 
-| Duration | Memory |
-|----------|--------|
-| 131ms    | 23MiB  |
+| Duration | Memory  |
+|----------|---------|
+| 19.723ms | 8.389mb |
 
 
-### Doctrine entity
-
-```php
-$qb = $this->bookRepository->createQueryBuilder('book');
-$result = $qb
-    ->getQuery()
-    ->getResult();
-foreach($result as $book) {
-    $author = $book->getAuthors()[0];
-    if($author instanceof Author) {
-        $author->getFirstName();
-    }
-}
-```
-
-| Duration | Memory |
-|----------|--------|
-| 8640ms   | 35MiB  |
+## \App\Tests\Benchmarks\ScalarBench
 
 
-## Scalar
-
-
-### FlatMapper mapping DQL
+### benchFlatMapperWithDQL
 
 ```php
 $qb = $this->bookRepository->createQueryBuilder('book');
@@ -70,32 +55,26 @@ $result = $qb->select('book.id, book.title, book.isbn')
 $result = $this->flatMapper->map(BookScalarDTO::class, $result);
 ```
 
-| Duration | Memory |
-|----------|--------|
-| 74ms     | 34MiB  |
+| Duration | Memory   |
+|----------|----------|
+| 55.895ms | 10.486mb |
 
 
-### Doctrine DTO
+### benchDoctrineDTOs
 
 ```php
 $qb = $this->bookRepository->createQueryBuilder('book');
-$result = $qb->select(
-    sprintf('
-    NEW %s(
-        book.id,
-        book.title,
-        book.isbn)',
-        BookScalarDTO::class))
+$result = $qb->select(sprintf('NEW %s(book.id, book.title, book.isbn)', BookScalarDTO::class))
     ->getQuery()
     ->getResult();
 ```
 
-| Duration | Memory |
-|----------|--------|
-| 68ms     | 34MiB  |
+| Duration | Memory   |
+|----------|----------|
+| 51.416ms | 10.486mb |
 
 
-### Manual mapping DQL
+### benchManualMappingWithDQL
 
 ```php
 $qb = $this->bookRepository->createQueryBuilder('book');
@@ -109,37 +88,70 @@ foreach ($result as $productEdit) {
 }
 ```
 
-| Duration | Memory |
-|----------|--------|
-| 76ms     | 34MiB  |
+| Duration | Memory   |
+|----------|----------|
+| 52.689ms | 10.486mb |
 
 
-### Flatmapper mapping SQL
-
-```php
-$query = $this->entityManager->getConnection()->executeQuery('SELECT id, title, isbn FROM book');
-$result = $this->flatMapper->map(BookScalarDTO::class, $query->iterateAssociative());
-```
-
-| Duration | Memory |
-|----------|--------|
-| 34ms     | 34MiB  |
+## \App\Tests\Benchmarks\NestedBench
 
 
-### Manual mapping SQL
+### benchFlatMapperDTOs
 
 ```php
-$query = $this->entityManager->getConnection()->executeQuery('SELECT id, title, isbn FROM book');
-
-$resultSet = [];
-foreach($query->iterateAssociative() as $row) {
-    $resultSet[] = new BookScalarDTO(...$row);
+$qb = $this->bookRepository->createQueryBuilder('book');
+$result = $qb->select('book.id, book.title, book.isbn, authors.id as author_id, authors.firstName as author_first_name, authors.lastName as author_last_name, reviews.id as review_id, reviews.rating as review_rating')
+    ->leftJoin('book.authors', 'authors')
+    ->leftJoin('book.reviews', 'reviews')
+    ->getQuery()
+    ->getResult();
+$result = $this->flatMapper->map(BookDTO::class, $result);
+foreach ($result as $book) {
+    $this->bookDisplayer->display($book);
 }
 ```
 
-| Duration | Memory |
-|----------|--------|
-| 22ms     | 34MiB  |
+| Duration  | Memory   |
+|-----------|----------|
+| 244.825ms | 25.166mb |
+
+
+### benchDoctrineEntities
+
+```php
+$qb = $this->bookRepository->createQueryBuilder('book');
+$result = $qb
+    ->leftJoin('book.authors', 'authors')
+    ->addSelect('authors')
+    ->leftJoin('book.reviews', 'reviews')
+    ->addSelect('reviews')
+    ->getQuery()
+    ->getResult();
+foreach ($result as $book) {
+    $this->bookDisplayer->display($book);
+}
+```
+
+| Duration  | Memory  |
+|-----------|---------|
+| 686.664ms | 44.04mb |
+
+
+### benchDoctrineEntitiesWithN1
+
+```php
+$qb = $this->bookRepository->createQueryBuilder('book');
+$result = $qb
+    ->getQuery()
+    ->getResult();
+foreach ($result as $book) {
+    $this->bookDisplayer->display($book);
+}
+```
+
+| Duration   | Memory   |
+|------------|----------|
+| 2314.667ms | 37.749mb |
 
 
 ## Execute the benchmark yourself
