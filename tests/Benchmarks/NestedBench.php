@@ -3,9 +3,12 @@
 namespace App\Tests\Benchmarks;
 
 use App\DTO\BookDTO;
+use App\Entity\Book;
 use App\Repository\BookRepository;
 use App\Service\BookDisplayer;
+use Doctrine\ORM\EntityManagerInterface;
 use Pixelshaped\FlatMapperBundle\FlatMapper;
+use SyliusLabs\AssociationHydrator\AssociationHydrator;
 
 
 /**
@@ -15,6 +18,8 @@ use Pixelshaped\FlatMapperBundle\FlatMapper;
 class NestedBench extends AbstractBench
 {
     private BookRepository $bookRepository;
+
+    private EntityManagerInterface $entityManager;
     private FlatMapper $flatMapper;
 
     private BookDisplayer $bookDisplayer;
@@ -59,11 +64,34 @@ class NestedBench extends AbstractBench
         }
     }
 
+    public function benchDoctrineEntitiesWithAssociationHydrator()
+    {
+        $qb = $this->bookRepository->createQueryBuilder('book');
+        $result = $qb
+            ->getQuery()
+            ->getResult();
+
+        $sylusAssociationHydrator = new AssociationHydrator(
+            $this->entityManager,
+            $this->entityManager->getClassMetadata(Book::class)
+        );
+
+        $sylusAssociationHydrator->hydrateAssociations($result, [
+            'authors',
+            'reviews',
+        ]);
+
+        foreach ($result as $book) {
+            $this->bookDisplayer->display($book);
+        }
+    }
+
     public function setUp(): void
     {
         $container = $this->container();
         $this->bookRepository = $container->get(BookRepository::class);
         $this->flatMapper = $container->get(FlatMapper::class);
         $this->bookDisplayer = $container->get(BookDisplayer::class);
+        $this->entityManager = $container->get(EntityManagerInterface::class);
     }
 }

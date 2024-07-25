@@ -12,16 +12,17 @@ While Doctrine entities are a fantastic tool to prototype, or even use on some o
 In the end your Model should rarely ever be larger than your View and the proper way to achieve this is to use DTOs. Doctrine provides a way to retrieve scalar DTOs, but you're on your own if you need nested DTOs. The creation of [pixelshaped/flat-mapper-bundle](https://github.com/Pixelshaped/flat-mapper-bundle) arose from that situation and aims to fill this gap.
 
 ## Summary
-| Category       | Method                      | Duration    | Memory   |
-|----------------|-----------------------------|-------------|----------|
-| NestedBench    | benchFlatMapperDTOs         | 278.072ms   | 27.263mb |
-| NestedBench    | benchDoctrineEntities       | 761.965ms   | 46.137mb |
-| NestedBench    | benchDoctrineEntitiesWithN1 | 10093.759ms | 39.846mb |
-| DQLScalarBench | benchFlatMapperWithDQL      | 68.705ms    | 12.583mb |
-| DQLScalarBench | benchDoctrineDTOs           | 59.368ms    | 10.486mb |
-| DQLScalarBench | benchManualMappingWithDQL   | 62.124ms    | 12.583mb |
-| SQLScalarBench | benchFlatMapperWithSQL      | 38.187ms    | 8.389mb  |
-| SQLScalarBench | benchManualMappingWithSQL   | 29.843ms    | 8.389mb  |
+| Category       | Method                                       | Duration  | Memory   |
+|----------------|----------------------------------------------|-----------|----------|
+| NestedBench    | benchFlatMapperDTOs                          | 281.039ms | 27.263mb |
+| NestedBench    | benchDoctrineEntities                        | 747.492ms | 44.04mb  |
+| NestedBench    | benchDoctrineEntitiesWithN1                  | 9777.04ms | 39.846mb |
+| NestedBench    | benchDoctrineEntitiesWithAssociationHydrator | 814.968ms | 44.04mb  |
+| DQLScalarBench | benchFlatMapperWithDQL                       | 70.96ms   | 12.583mb |
+| DQLScalarBench | benchDoctrineDTOs                            | 61.177ms  | 12.583mb |
+| DQLScalarBench | benchManualMappingWithDQL                    | 65.749ms  | 12.583mb |
+| SQLScalarBench | benchFlatMapperWithSQL                       | 38.577ms  | 8.389mb  |
+| SQLScalarBench | benchManualMappingWithSQL                    | 32.892ms  | 8.389mb  |
 
 
 
@@ -49,7 +50,7 @@ foreach ($result as $book) {
 
 | Duration  | Memory   |
 |-----------|----------|
-| 278.072ms | 27.263mb |
+| 281.039ms | 27.263mb |
 
 
 ### benchDoctrineEntities
@@ -68,9 +69,9 @@ foreach ($result as $book) {
 }
 ```
 
-| Duration  | Memory   |
-|-----------|----------|
-| 761.965ms | 46.137mb |
+| Duration  | Memory  |
+|-----------|---------|
+| 747.492ms | 44.04mb |
 
 
 ### benchDoctrineEntitiesWithN1
@@ -85,9 +86,37 @@ foreach ($result as $book) {
 }
 ```
 
-| Duration    | Memory   |
-|-------------|----------|
-| 10093.759ms | 39.846mb |
+| Duration  | Memory   |
+|-----------|----------|
+| 9777.04ms | 39.846mb |
+
+
+### benchDoctrineEntitiesWithAssociationHydrator
+
+```php
+$qb = $this->bookRepository->createQueryBuilder('book');
+$result = $qb
+    ->getQuery()
+    ->getResult();
+
+$sylusAssociationHydrator = new AssociationHydrator(
+    $this->entityManager,
+    $this->entityManager->getClassMetadata(Book::class)
+);
+
+$sylusAssociationHydrator->hydrateAssociations($result, [
+    'authors',
+    'reviews',
+]);
+
+foreach ($result as $book) {
+    $this->bookDisplayer->display($book);
+}
+```
+
+| Duration  | Memory  |
+|-----------|---------|
+| 814.968ms | 44.04mb |
 
 
 ## DQLScalarBench
@@ -96,7 +125,7 @@ In these tests we can see that all methods to map DQL results to a DTO only supp
 
 Doctrine DTO has a little edge as it creates the DTOs during the results hydration, where other methods have to do it in another loop.
 
-FlatMapper is a little slower as it uses named parameters internally instead of mapping data in the same order as it has been queried.
+FlatMapper is a little slower as it uses named parameters internally instead of mapping data to the constructor in the same order as it has been queried, but it&#039;s not significant.
 
 
 ### benchFlatMapperWithDQL
@@ -111,7 +140,7 @@ $result = $this->flatMapper->map(BookScalarDTO::class, $result);
 
 | Duration | Memory   |
 |----------|----------|
-| 68.705ms | 12.583mb |
+| 70.96ms  | 12.583mb |
 
 
 ### benchDoctrineDTOs
@@ -125,7 +154,7 @@ $result = $qb->select(sprintf('NEW %s(book.id, book.title, book.isbn)', BookScal
 
 | Duration | Memory   |
 |----------|----------|
-| 59.368ms | 10.486mb |
+| 61.177ms | 12.583mb |
 
 
 ### benchManualMappingWithDQL
@@ -144,7 +173,7 @@ foreach ($result as $productEdit) {
 
 | Duration | Memory   |
 |----------|----------|
-| 62.124ms | 12.583mb |
+| 65.749ms | 12.583mb |
 
 
 ## SQLScalarBench
@@ -161,7 +190,7 @@ $result = $this->flatMapper->map(BookScalarDTO::class, $query->iterateAssociativ
 
 | Duration | Memory  |
 |----------|---------|
-| 38.187ms | 8.389mb |
+| 38.577ms | 8.389mb |
 
 
 ### benchManualMappingWithSQL
@@ -176,7 +205,7 @@ foreach($query->iterateAssociative() as $row) {
 
 | Duration | Memory  |
 |----------|---------|
-| 29.843ms | 8.389mb |
+| 32.892ms | 8.389mb |
 
 
 ## Execute the benchmark yourself
