@@ -12,8 +12,7 @@ use SyliusLabs\AssociationHydrator\AssociationHydrator;
 
 
 /**
- * This is the main and most relevant comparison: FlatMapper truly shines when using nested DTOs versus entities.
- * Using other DTO mappers based on entities will eventually result in lower performance than `benchDoctrineEntities`.
+ * This is the main and most relevant comparison: FlatMapper truly shines when using nested DTOs versus nested entities.
  */
 class NestedBench extends AbstractBench
 {
@@ -24,6 +23,9 @@ class NestedBench extends AbstractBench
 
     private BookDisplayer $bookDisplayer;
 
+    /**
+     * In this benchmark we're using FlatMapper to map a DTO that has the same number of fields than the entity it mimics (in benchDoctrineEntities). It's the fairest comparison. In real life situations entities tend to have a lot of unneeded properties.
+     */
     public function benchFlatMapperDTOs()
     {
         $qb = $this->bookRepository->createQueryBuilder('book');
@@ -38,6 +40,9 @@ class NestedBench extends AbstractBench
         }
     }
 
+    /**
+     * This is the base Doctrine benchmark. Using other DTO mappers based on entities will display similar performance.
+     */
     public function benchDoctrineEntities()
     {
         $qb = $this->bookRepository->createQueryBuilder('book');
@@ -53,6 +58,9 @@ class NestedBench extends AbstractBench
         }
     }
 
+    /**
+     * This benchmarks Doctrine when the user forgets to add JOIN statements and Doctrine has to make N+1 queries. It's not a fair comparison but illustrates how Doctrine behaves in such a situation (on one hand: it will always land on its feet, on the other hand: at what cost?)
+     */
     public function benchDoctrineEntitiesWithN1()
     {
         $qb = $this->bookRepository->createQueryBuilder('book');
@@ -64,7 +72,10 @@ class NestedBench extends AbstractBench
         }
     }
 
-    public function benchDoctrineEntitiesWithAssociationHydrator()
+    /**
+     * Out of curiosity I added a benchmark for Sylius Association-Hydrator. It's a widely used bundle that relies on PARTIAL queries (which restrict its usage to ORM2).
+     */
+    public function benchDoctrineEntitiesWithSyliusAssociationHydrator()
     {
         $qb = $this->bookRepository->createQueryBuilder('book');
         $result = $qb

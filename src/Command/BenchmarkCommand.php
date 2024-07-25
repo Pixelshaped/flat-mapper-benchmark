@@ -54,6 +54,7 @@ final class BenchmarkCommand extends Command
                     'source' => $source,
                     'duration' => $duration,
                     'memory' => $memory,
+                    'description' => $this->getDocComment(new \ReflectionMethod($className, $methodName))
                 ];
             }
         }
@@ -70,9 +71,9 @@ final class BenchmarkCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function getDocComment(\ReflectionClass $class): string
+    private function getDocComment(\ReflectionClass|\ReflectionMethod $reflectionObject): string
     {
-        $comment = $class->getDocComment();
+        $comment = $reflectionObject->getDocComment();
         if($comment === false) {
             return '';
         }

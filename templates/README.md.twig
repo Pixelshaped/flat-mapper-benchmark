@@ -35,6 +35,10 @@ In the end your Model should rarely ever be larger than your View and the proper
 
 ### {{ method }}
 
+{% if benchmark.description|default %}
+{{ benchmark.description }}
+{% endif %}
+
 ```php
 {{ benchmark.source|raw }}```
 
