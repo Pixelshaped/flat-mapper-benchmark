@@ -3,17 +3,17 @@
 namespace App\DTO;
 
 use App\Service\AuthorDisplayableInterface;
-use Pixelshaped\FlatMapperBundle\Attributes\Identifier;
-use Pixelshaped\FlatMapperBundle\Attributes\InboundPropertyName;
+use Pixelshaped\FlatMapperBundle\Mapping\Identifier;
+use Pixelshaped\FlatMapperBundle\Mapping\Scalar;
 
 class AuthorDTO implements AuthorDisplayableInterface
 {
     public function __construct(
         #[Identifier('author_id')]
         public int $id,
-        #[InboundPropertyName('author_first_name')]
+        #[Scalar('author_first_name')]
         public string $firstName,
-        #[InboundPropertyName('author_last_name')]
+        #[Scalar('author_last_name')]
         public string $lastName,
     ){}
 

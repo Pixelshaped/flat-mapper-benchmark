@@ -3,15 +3,15 @@
 namespace App\DTO;
 
 use App\Service\ReviewDisplayableInterface;
-use Pixelshaped\FlatMapperBundle\Attributes\Identifier;
-use Pixelshaped\FlatMapperBundle\Attributes\InboundPropertyName;
+use Pixelshaped\FlatMapperBundle\Mapping\Identifier;
+use Pixelshaped\FlatMapperBundle\Mapping\Scalar;
 
 class ReviewDTO implements ReviewDisplayableInterface
 {
     public function __construct(
         #[Identifier('review_id')]
         public int $id,
-        #[InboundPropertyName('review_rating')]
+        #[Scalar('review_rating')]
         public int $rating,
     ){}
 

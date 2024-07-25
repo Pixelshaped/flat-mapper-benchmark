@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-use Pixelshaped\FlatMapperBundle\Attributes\Identifier;
+use Pixelshaped\FlatMapperBundle\Mapping\Identifier;
 
 class BookScalarDTO
 {

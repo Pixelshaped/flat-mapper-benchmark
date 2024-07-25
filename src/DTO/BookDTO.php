@@ -3,8 +3,8 @@
 namespace App\DTO;
 
 use App\Service\BookDisplayableInterface;
-use Pixelshaped\FlatMapperBundle\Attributes\Identifier;
-use Pixelshaped\FlatMapperBundle\Attributes\ReferencesArray;
+use Pixelshaped\FlatMapperBundle\Mapping\Identifier;
+use Pixelshaped\FlatMapperBundle\Mapping\ReferenceArray;
 
 class BookDTO implements BookDisplayableInterface
 {
@@ -13,9 +13,9 @@ class BookDTO implements BookDisplayableInterface
         public int $id,
         public string $title,
         public string $isbn,
-        #[ReferencesArray(AuthorDTO::class)]
+        #[ReferenceArray(AuthorDTO::class)]
         public array $authors,
-        #[ReferencesArray(ReviewDTO::class)]
+        #[ReferenceArray(ReviewDTO::class)]
         public array $reviews,
     ){}
 
