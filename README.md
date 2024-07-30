@@ -14,15 +14,15 @@ In the end your Model should rarely ever be larger than your View and the proper
 ## Summary
 | Category       | Method                                             | Duration    | Memory   |
 |----------------|----------------------------------------------------|-------------|----------|
-| NestedBench    | benchFlatMapperDTOs                                | 271.683ms   | 27.263mb |
-| NestedBench    | benchDoctrineEntities                              | 761.621ms   | 44.04mb  |
-| NestedBench    | benchDoctrineEntitiesWithN1                        | 10617.496ms | 39.846mb |
-| NestedBench    | benchDoctrineEntitiesWithSyliusAssociationHydrator | 809.01ms    | 44.04mb  |
-| DQLScalarBench | benchFlatMapperWithDQL                             | 72.009ms    | 12.583mb |
-| DQLScalarBench | benchDoctrineDTOs                                  | 64.005ms    | 12.583mb |
-| DQLScalarBench | benchManualMappingWithDQL                          | 66.071ms    | 12.583mb |
-| SQLScalarBench | benchFlatMapperWithSQL                             | 37.388ms    | 8.389mb  |
-| SQLScalarBench | benchManualMappingWithSQL                          | 35.186ms    | 8.389mb  |
+| NestedBench    | benchFlatMapperDTOs                                | 267.946ms   | 25.166mb |
+| NestedBench    | benchDoctrineEntities                              | 735.431ms   | 44.04mb  |
+| NestedBench    | benchDoctrineEntitiesWithN1                        | 10974.221ms | 39.846mb |
+| NestedBench    | benchDoctrineEntitiesWithSyliusAssociationHydrator | 799.386ms   | 44.04mb  |
+| DQLScalarBench | benchFlatMapperWithDQL                             | 66.184ms    | 12.583mb |
+| DQLScalarBench | benchDoctrineDTOs                                  | 56.644ms    | 12.583mb |
+| DQLScalarBench | benchManualMappingWithDQL                          | 61.203ms    | 12.583mb |
+| SQLScalarBench | benchFlatMapperWithSQL                             | 38.105ms    | 8.389mb  |
+| SQLScalarBench | benchManualMappingWithSQL                          | 33.514ms    | 8.389mb  |
 
 
 
@@ -50,7 +50,7 @@ foreach ($result as $book) {
 
 | Duration  | Memory   |
 |-----------|----------|
-| 271.683ms | 27.263mb |
+| 267.946ms | 25.166mb |
 
 
 ### benchDoctrineEntities
@@ -73,7 +73,7 @@ foreach ($result as $book) {
 
 | Duration  | Memory  |
 |-----------|---------|
-| 761.621ms | 44.04mb |
+| 735.431ms | 44.04mb |
 
 
 ### benchDoctrineEntitiesWithN1
@@ -92,7 +92,7 @@ foreach ($result as $book) {
 
 | Duration    | Memory   |
 |-------------|----------|
-| 10617.496ms | 39.846mb |
+| 10974.221ms | 39.846mb |
 
 
 ### benchDoctrineEntitiesWithSyliusAssociationHydrator
@@ -120,9 +120,9 @@ foreach ($result as $book) {
 }
 ```
 
-| Duration | Memory  |
-|----------|---------|
-| 809.01ms | 44.04mb |
+| Duration  | Memory  |
+|-----------|---------|
+| 799.386ms | 44.04mb |
 
 
 ## DQLScalarBench
@@ -147,7 +147,7 @@ $result = $this->flatMapper->map(BookScalarDTO::class, $result);
 
 | Duration | Memory   |
 |----------|----------|
-| 72.009ms | 12.583mb |
+| 66.184ms | 12.583mb |
 
 
 ### benchDoctrineDTOs
@@ -162,7 +162,7 @@ $result = $qb->select(sprintf('NEW %s(book.id, book.title, book.isbn)', BookScal
 
 | Duration | Memory   |
 |----------|----------|
-| 64.005ms | 12.583mb |
+| 56.644ms | 12.583mb |
 
 
 ### benchManualMappingWithDQL
@@ -182,7 +182,7 @@ foreach ($result as $productEdit) {
 
 | Duration | Memory   |
 |----------|----------|
-| 66.071ms | 12.583mb |
+| 61.203ms | 12.583mb |
 
 
 ## SQLScalarBench
@@ -200,7 +200,7 @@ $result = $this->flatMapper->map(BookScalarDTO::class, $query->iterateAssociativ
 
 | Duration | Memory  |
 |----------|---------|
-| 37.388ms | 8.389mb |
+| 38.105ms | 8.389mb |
 
 
 ### benchManualMappingWithSQL
@@ -216,7 +216,7 @@ foreach($query->iterateAssociative() as $row) {
 
 | Duration | Memory  |
 |----------|---------|
-| 35.186ms | 8.389mb |
+| 33.514ms | 8.389mb |
 
 
 ## Execute the benchmark yourself
@@ -227,14 +227,8 @@ composer install
 # Launch database container
 docker-compose up -d
 
-# Create database
-bin/console doctrine:database:create
-
-# Execute migrations
-bin/console doctrine:migrations:migrate
-
-# Load fixtures
-bin/console doctrine:fixtures:load
+# Create database, migrate, load fixtures
+composer prepare-benchmark
 
 # Execute benchmark
 bin/console app:benchmark 

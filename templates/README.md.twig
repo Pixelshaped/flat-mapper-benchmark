@@ -57,14 +57,8 @@ composer install
 # Launch database container
 docker-compose up -d
 
-# Create database
-bin/console doctrine:database:create
-
-# Execute migrations
-bin/console doctrine:migrations:migrate
-
-# Load fixtures
-bin/console doctrine:fixtures:load
+# Create database, migrate, load fixtures
+composer prepare-benchmark
 
 # Execute benchmark
 bin/console app:benchmark 
