@@ -11,6 +11,9 @@ While Doctrine entities are a fantastic tool to prototype, or even use on some o
 
 In the end your Model should rarely ever be larger than your View and the proper way to achieve this is to use DTOs. Doctrine provides a way to retrieve scalar DTOs, but you're on your own if you need nested DTOs. The creation of [pixelshaped/flat-mapper-bundle](https://github.com/Pixelshaped/flat-mapper-bundle) arose from that situation and aims to fill this gap.
 
+## Benched version
+{{ flatmapper_package_name }}: {{ flatmapper_version }}
+
 ## Summary
 {% set summary_rows = [] %}
 {% for category, benchmarks_for_category in benchmarks %}

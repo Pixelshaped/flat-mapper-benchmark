@@ -22,6 +22,7 @@ final class BenchmarkCommand extends Command
     private array $benchmarkResults = [];
 
     private const array BENCH_ORDER = ['NestedBench', 'DQLScalarBench', 'SQLScalarBench'];
+    private const string FLAT_MAPPER_BUNDLE_PACKAGE_NAME = 'pixelshaped/flat-mapper-bundle';
 
     public function __construct(
         private readonly string $projectDir,
@@ -63,6 +64,8 @@ final class BenchmarkCommand extends Command
 
         $readmeFileContent = $this->twig->render('README.md.twig', [
             'benchmarks' => $this->benchmarkResults,
+            'flatmapper_package_name' => self::FLAT_MAPPER_BUNDLE_PACKAGE_NAME,
+            'flatmapper_version' => $this->getPackageVersion(self::FLAT_MAPPER_BUNDLE_PACKAGE_NAME),
         ]);
         file_put_contents($this->projectDir.'/README.md', $readmeFileContent);
 
@@ -102,5 +105,26 @@ final class BenchmarkCommand extends Command
         }
 
         return str_replace('        ', '', $body);
+    }
+
+    private function getPackageVersion(string $packageName): string
+    {
+        $composerLockPath = $this->projectDir.'/composer.lock';
+        $composerLockContent = file_get_contents($composerLockPath);
+        if ($composerLockContent === false) {
+            throw new \RuntimeException(sprintf('Unable to read composer lock file "%s".', $composerLockPath));
+        }
+
+        $composerLock = json_decode($composerLockContent, true, flags: \JSON_THROW_ON_ERROR);
+
+        foreach (['packages', 'packages-dev'] as $section) {
+            foreach ($composerLock[$section] ?? [] as $package) {
+                if (($package['name'] ?? null) === $packageName) {
+                    return (string)($package['version'] ?? 'unknown');
+                }
+            }
+        }
+
+        throw new \RuntimeException(sprintf('Package "%s" was not found in %s.', $packageName, $composerLockPath));
     }
 }
